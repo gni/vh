@@ -1,0 +1,282 @@
+#compdef vh
+
+autoload -U is-at-least
+
+_vh() {
+    typeset -A opt_args
+    typeset -a _arguments_options
+    local ret=1
+
+    if is-at-least 5.2; then
+        _arguments_options=(-s -S -C)
+    else
+        _arguments_options=(-s -C)
+    fi
+
+    local context curcontext="$curcontext" state line
+    _arguments "${_arguments_options[@]}" : \
+'-v[Enable verbose logging output]' \
+'--verbose[Enable verbose logging output]' \
+'-h[Print help]' \
+'--help[Print help]' \
+'-V[Print version]' \
+'--version[Print version]' \
+":: :_vh_commands" \
+"*::: :->vh" \
+&& ret=0
+    case $state in
+    (vh)
+        words=($line[1] "${words[@]}")
+        (( CURRENT += 1 ))
+        curcontext="${curcontext%:*:*}:vh-command-$line[1]:"
+        case $line[1] in
+            (create)
+_arguments "${_arguments_options[@]}" : \
+'-i+[IP address to point the domain to]:IP:_default' \
+'--ip=[IP address to point the domain to]:IP:_default' \
+'-v[Enable verbose logging output]' \
+'--verbose[Enable verbose logging output]' \
+'-h[Print help]' \
+'--help[Print help]' \
+':domain -- Domain name (e.g., '\''myapp'\'' creates '\''myapp.test'\'', '\''api.local'\'' creates '\''api.local'\''):_default' \
+&& ret=0
+;;
+(list)
+_arguments "${_arguments_options[@]}" : \
+'-v[Enable verbose logging output]' \
+'--verbose[Enable verbose logging output]' \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(describe)
+_arguments "${_arguments_options[@]}" : \
+'-v[Enable verbose logging output]' \
+'--verbose[Enable verbose logging output]' \
+'-h[Print help]' \
+'--help[Print help]' \
+':identifier -- ID, name, or domain to describe:_default' \
+&& ret=0
+;;
+(remove)
+_arguments "${_arguments_options[@]}" : \
+'-v[Enable verbose logging output]' \
+'--verbose[Enable verbose logging output]' \
+'-h[Print help]' \
+'--help[Print help]' \
+':identifier -- ID, name, or domain to remove:_default' \
+&& ret=0
+;;
+(allow-ext)
+_arguments "${_arguments_options[@]}" : \
+'-v[Enable verbose logging output]' \
+'--verbose[Enable verbose logging output]' \
+'-h[Print help]' \
+'--help[Print help]' \
+':ext -- The extension to allow (e.g., '\''dev'\''):_default' \
+&& ret=0
+;;
+(remove-ext)
+_arguments "${_arguments_options[@]}" : \
+'-v[Enable verbose logging output]' \
+'--verbose[Enable verbose logging output]' \
+'-h[Print help]' \
+'--help[Print help]' \
+':ext -- The extension to remove:_default' \
+&& ret=0
+;;
+(completions)
+_arguments "${_arguments_options[@]}" : \
+'-v[Enable verbose logging output]' \
+'--verbose[Enable verbose logging output]' \
+'-h[Print help]' \
+'--help[Print help]' \
+':shell -- The shell to generate the completions for:(bash elvish fish powershell zsh)' \
+&& ret=0
+;;
+(ca)
+_arguments "${_arguments_options[@]}" : \
+'-v[Enable verbose logging output]' \
+'--verbose[Enable verbose logging output]' \
+'-h[Print help]' \
+'--help[Print help]' \
+&& ret=0
+;;
+(help)
+_arguments "${_arguments_options[@]}" : \
+":: :_vh__help_commands" \
+"*::: :->help" \
+&& ret=0
+
+    case $state in
+    (help)
+        words=($line[1] "${words[@]}")
+        (( CURRENT += 1 ))
+        curcontext="${curcontext%:*:*}:vh-help-command-$line[1]:"
+        case $line[1] in
+            (create)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(list)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(describe)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(remove)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(allow-ext)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(remove-ext)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(completions)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(ca)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(help)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+        esac
+    ;;
+esac
+;;
+        esac
+    ;;
+esac
+}
+
+(( $+functions[_vh_commands] )) ||
+_vh_commands() {
+    local commands; commands=(
+'create:Create or update a local development domain' \
+'list:List all managed domains' \
+'describe:View detailed information and integration paths for a domain' \
+'remove:Remove a managed domain' \
+'allow-ext:Allow a custom domain extension (TLD)' \
+'remove-ext:Remove a custom domain extension (TLD) from the allowed list' \
+'completions:Generate shell completion scripts' \
+'ca:Show path to the Root CA certificate and installation instructions' \
+'help:Print this message or the help of the given subcommand(s)' \
+    )
+    _describe -t commands 'vh commands' commands "$@"
+}
+(( $+functions[_vh__allow-ext_commands] )) ||
+_vh__allow-ext_commands() {
+    local commands; commands=()
+    _describe -t commands 'vh allow-ext commands' commands "$@"
+}
+(( $+functions[_vh__ca_commands] )) ||
+_vh__ca_commands() {
+    local commands; commands=()
+    _describe -t commands 'vh ca commands' commands "$@"
+}
+(( $+functions[_vh__completions_commands] )) ||
+_vh__completions_commands() {
+    local commands; commands=()
+    _describe -t commands 'vh completions commands' commands "$@"
+}
+(( $+functions[_vh__create_commands] )) ||
+_vh__create_commands() {
+    local commands; commands=()
+    _describe -t commands 'vh create commands' commands "$@"
+}
+(( $+functions[_vh__describe_commands] )) ||
+_vh__describe_commands() {
+    local commands; commands=()
+    _describe -t commands 'vh describe commands' commands "$@"
+}
+(( $+functions[_vh__help_commands] )) ||
+_vh__help_commands() {
+    local commands; commands=(
+'create:Create or update a local development domain' \
+'list:List all managed domains' \
+'describe:View detailed information and integration paths for a domain' \
+'remove:Remove a managed domain' \
+'allow-ext:Allow a custom domain extension (TLD)' \
+'remove-ext:Remove a custom domain extension (TLD) from the allowed list' \
+'completions:Generate shell completion scripts' \
+'ca:Show path to the Root CA certificate and installation instructions' \
+'help:Print this message or the help of the given subcommand(s)' \
+    )
+    _describe -t commands 'vh help commands' commands "$@"
+}
+(( $+functions[_vh__help__allow-ext_commands] )) ||
+_vh__help__allow-ext_commands() {
+    local commands; commands=()
+    _describe -t commands 'vh help allow-ext commands' commands "$@"
+}
+(( $+functions[_vh__help__ca_commands] )) ||
+_vh__help__ca_commands() {
+    local commands; commands=()
+    _describe -t commands 'vh help ca commands' commands "$@"
+}
+(( $+functions[_vh__help__completions_commands] )) ||
+_vh__help__completions_commands() {
+    local commands; commands=()
+    _describe -t commands 'vh help completions commands' commands "$@"
+}
+(( $+functions[_vh__help__create_commands] )) ||
+_vh__help__create_commands() {
+    local commands; commands=()
+    _describe -t commands 'vh help create commands' commands "$@"
+}
+(( $+functions[_vh__help__describe_commands] )) ||
+_vh__help__describe_commands() {
+    local commands; commands=()
+    _describe -t commands 'vh help describe commands' commands "$@"
+}
+(( $+functions[_vh__help__help_commands] )) ||
+_vh__help__help_commands() {
+    local commands; commands=()
+    _describe -t commands 'vh help help commands' commands "$@"
+}
+(( $+functions[_vh__help__list_commands] )) ||
+_vh__help__list_commands() {
+    local commands; commands=()
+    _describe -t commands 'vh help list commands' commands "$@"
+}
+(( $+functions[_vh__help__remove_commands] )) ||
+_vh__help__remove_commands() {
+    local commands; commands=()
+    _describe -t commands 'vh help remove commands' commands "$@"
+}
+(( $+functions[_vh__help__remove-ext_commands] )) ||
+_vh__help__remove-ext_commands() {
+    local commands; commands=()
+    _describe -t commands 'vh help remove-ext commands' commands "$@"
+}
+(( $+functions[_vh__list_commands] )) ||
+_vh__list_commands() {
+    local commands; commands=()
+    _describe -t commands 'vh list commands' commands "$@"
+}
+(( $+functions[_vh__remove_commands] )) ||
+_vh__remove_commands() {
+    local commands; commands=()
+    _describe -t commands 'vh remove commands' commands "$@"
+}
+(( $+functions[_vh__remove-ext_commands] )) ||
+_vh__remove-ext_commands() {
+    local commands; commands=()
+    _describe -t commands 'vh remove-ext commands' commands "$@"
+}
+
+if [ "$funcstack[1]" = "_vh" ]; then
+    _vh "$@"
+else
+    compdef _vh vh
+fi
