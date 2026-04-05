@@ -2,6 +2,7 @@ mod types;
 mod ca;
 mod config;
 mod hosts;
+mod domain;
 
 use anyhow::{Context, Result};
 use clap::{Parser, Subcommand};
@@ -12,6 +13,7 @@ use uuid::Uuid;
 
 use crate::ca::{CaGenerator, CaInstructions};
 use crate::config::ConfigPersistence;
+use crate::domain::DomainDescriptor;
 use crate::hosts::HostsModifier;
 use crate::types::DomainConfig;
 
@@ -30,6 +32,9 @@ enum Commands {
         ip: String,
     },
     List,
+    Describe {
+        identifier: String,
+    },
     Remove { 
         identifier: String 
     },
@@ -137,6 +142,13 @@ fn main() -> Result<()> {
             for d in &config.domains {
                 let short_id: String = d.id.chars().take(8).collect();
                 println!("{:<10} {:<25} {:<15} {:<20}", short_id, d.domain, d.ip, d.created_at.format("%Y-%m-%d %H:%M:%S").to_string());
+            }
+        }
+        Commands::Describe { identifier } => {
+            if let Some(domain_cfg) = config.domains.iter().find(|d| d.id.starts_with(&identifier) || d.domain == identifier || d.name == identifier) {
+                DomainDescriptor::print(domain_cfg);
+            } else {
+                println!("[ERROR] Domain or ID '{}' not found.", identifier);
             }
         }
         Commands::Remove { identifier } => {
