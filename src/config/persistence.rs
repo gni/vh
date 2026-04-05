@@ -18,6 +18,7 @@ impl ConfigPersistence {
         if !self.config_path.exists() {
             return Ok(AppConfig {
                 domains: Vec::new(),
+                allowed_extensions: Vec::new(),
                 root_ca_cert: data_dir.join("root_ca.crt"),
                 root_ca_key: data_dir.join("root_ca.key"),
             });

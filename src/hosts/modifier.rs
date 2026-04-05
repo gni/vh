@@ -7,26 +7,30 @@ pub struct HostsModifier;
 impl HostsModifier {
     const HOSTS_PATH: &'static str = "/etc/hosts";
 
-    pub fn add_entry(domain: &str) -> Result<()> {
-        let entry = format!("127.0.0.1 {}", domain);
+    pub fn add_entry(domain: &str, ip: &str) -> Result<()> {
+        let entry = format!("{} {}", ip, domain);
         let current = std::fs::read_to_string(Self::HOSTS_PATH)?;
 
-        if current.contains(domain) {
-            return Ok(());
-        }
+        let mut lines: Vec<&str> = current
+            .lines()
+            .filter(|line| !line.contains(domain))
+            .collect();
 
-        let updated = format!("{}\n{}\n", current.trim_end(), entry);
+        lines.push(&entry);
+        let updated = format!("{}\n", lines.join("\n"));
+        
         Self::apply_changes(updated)
     }
 
     pub fn remove_entry(domain: &str) -> Result<()> {
         let current = std::fs::read_to_string(Self::HOSTS_PATH)?;
+        
         let filtered: Vec<&str> = current
             .lines()
             .filter(|line| !line.contains(domain))
             .collect();
 
-        let updated = filtered.join("\n") + "\n";
+        let updated = format!("{}\n", filtered.join("\n"));
         Self::apply_changes(updated)
     }
 

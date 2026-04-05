@@ -5,6 +5,8 @@ use crate::types::domain_config::DomainConfig;
 #[derive(Debug, Serialize, Deserialize)]
 pub struct AppConfig {
     pub domains: Vec<DomainConfig>,
+    #[serde(default)]
+    pub allowed_extensions: Vec<String>,
     pub root_ca_cert: PathBuf,
     pub root_ca_key: PathBuf,
 }
