@@ -55,15 +55,11 @@ enum Commands {
         /// ID, name, or domain to remove
         identifier: String 
     },
-    /// Allow a custom domain extension (TLD)
-    AllowExt {
-        /// The extension to allow (e.g., 'dev')
-        ext: String,
-    },
-    /// Remove a custom domain extension (TLD) from the allowed list
-    RemoveExt {
-        /// The extension to remove
-        ext: String,
+    /// Manage allowed custom domain extensions (TLDs)
+    #[command(alias = "ext")]
+    Extension {
+        #[command(subcommand)]
+        command: ExtensionCommands,
     },
     /// Generate shell completion scripts
     Completions {
@@ -73,6 +69,22 @@ enum Commands {
     },
     /// Show path to the Root CA certificate and installation instructions
     Ca,
+}
+
+#[derive(Subcommand)]
+enum ExtensionCommands {
+    /// Allow a custom domain extension (TLD)
+    Allow {
+        /// The extension to allow (e.g., 'dev')
+        name: String,
+    },
+    /// Remove a custom domain extension (TLD) from the allowed list
+    Remove {
+        /// The extension to remove
+        name: String,
+    },
+    /// List all custom allowed extensions
+    List,
 }
 
 fn main() -> Result<()> {
@@ -90,7 +102,6 @@ fn main() -> Result<()> {
     let config_store = ConfigPersistence::new(data_dir.clone());
     let mut config = config_store.load(&data_dir)?;
 
-    // Skip CA generation if we're just asking for completions
     if !matches!(cli.command, Commands::Completions { .. }) && !config.root_ca_cert.exists() {
         tracing::debug!("Initializing new Root CA at {:?}", config.root_ca_cert);
         CaGenerator::create_root_ca(&config.root_ca_cert, &config.root_ca_key)?;
@@ -121,7 +132,7 @@ fn main() -> Result<()> {
                     Custom allowed extensions: {:?}\n\
                     \n\
                     If you know what you are doing, allow it with:\n\
-                    vh allow-ext {}",
+                    vh extension allow {}",
                     "[ERROR]".red().bold(),
                     tld,
                     safe_extensions,
@@ -198,26 +209,38 @@ fn main() -> Result<()> {
                 println!("{} Domain or ID '{}' not found.", "[ERROR]".red().bold(), identifier);
             }
         }
-        Commands::AllowExt { ext } => {
-            let clean_ext = ext.trim_start_matches('.').to_string();
-            if !config.allowed_extensions.contains(&clean_ext) {
-                config.allowed_extensions.push(clean_ext.clone());
-                config_store.save(&config)?;
-                println!("{} Added '.{}' to allowed extensions.", "[SUCCESS]".green().bold(), clean_ext);
-            } else {
-                println!("{} Extension '.{}' is already allowed.", "[INFO]".cyan().bold(), clean_ext);
+        Commands::Extension { command } => match command {
+            ExtensionCommands::Allow { name } => {
+                let clean_ext = name.trim_start_matches('.').to_string();
+                if !config.allowed_extensions.contains(&clean_ext) {
+                    config.allowed_extensions.push(clean_ext.clone());
+                    config_store.save(&config)?;
+                    println!("{} Added '.{}' to allowed extensions.", "[SUCCESS]".green().bold(), clean_ext);
+                } else {
+                    println!("{} Extension '.{}' is already allowed.", "[INFO]".cyan().bold(), clean_ext);
+                }
             }
-        }
-        Commands::RemoveExt { ext } => {
-            let clean_ext = ext.trim_start_matches('.');
-            if let Some(pos) = config.allowed_extensions.iter().position(|e| e == clean_ext) {
-                config.allowed_extensions.remove(pos);
-                config_store.save(&config)?;
-                println!("{} Removed '.{}' from allowed extensions.", "[SUCCESS]".green().bold(), clean_ext);
-            } else {
-                println!("{} Extension '.{}' not found in custom allowed list.", "[WARNING]".yellow().bold(), clean_ext);
+            ExtensionCommands::Remove { name } => {
+                let clean_ext = name.trim_start_matches('.');
+                if let Some(pos) = config.allowed_extensions.iter().position(|e| e == clean_ext) {
+                    config.allowed_extensions.remove(pos);
+                    config_store.save(&config)?;
+                    println!("{} Removed '.{}' from allowed extensions.", "[SUCCESS]".green().bold(), clean_ext);
+                } else {
+                    println!("{} Extension '.{}' not found in custom allowed list.", "[WARNING]".yellow().bold(), clean_ext);
+                }
             }
-        }
+            ExtensionCommands::List => {
+                if config.allowed_extensions.is_empty() {
+                    println!("No custom extensions allowed yet.");
+                } else {
+                    println!("{}", "Custom Allowed Extensions:".bold());
+                    for ext in &config.allowed_extensions {
+                        println!("  .{}", ext);
+                    }
+                }
+            }
+        },
         Commands::Completions { shell } => {
             let mut cmd = Cli::command();
             generate(shell, &mut cmd, "vh", &mut io::stdout());
