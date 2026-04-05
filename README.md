@@ -1,6 +1,6 @@
 # vh (Virtual Host Manager)
 
-A simple, production-grade CLI tool for managing local development domains with trusted SSL certificates.
+A simple, CLI tool for managing local development domains with trusted SSL certificates.
 
 ## Installation
 

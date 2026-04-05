@@ -23,7 +23,7 @@ use crate::logger::Logger;
 use crate::types::DomainConfig;
 
 #[derive(Parser)]
-#[command(name = "vh", version = "0.1.0", about = "Production-grade Local VHost Manager")]
+#[command(name = "vh", version = "0.1.1", about = "Local VHost Manager")]
 struct Cli {
     #[command(subcommand)]
     command: Commands,
